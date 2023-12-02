@@ -14,7 +14,7 @@
 
 ## Технологии:
 <details><summary>Подробнее</summary><br>
-    
+
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue?logo=python)](https://www.python.org/)
 [![asyncio](https://img.shields.io/badge/-asyncio-464646?logo=python)](https://docs.python.org/3/library/asyncio.html)
 [![FastAPI](https://img.shields.io/badge/-FastAPI-464646?logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -53,7 +53,7 @@
 ```bash
 docker --version && docker-compose --version
 ```
-<h1></h1>    
+<h1></h1>
 </details>
 
 <details><summary>Локальный запуск: Docker Compose</summary>
@@ -70,7 +70,7 @@ nano .env
 ```bash
 docker compose -f docker/docker-compose.yml up -d --build
 ```
-Проект будет развернут в docker-контейнерах `db, backend` по адресу http://localhost. 
+Проект будет развернут в docker-контейнерах `db, backend` по адресу http://localhost.
 
 Администрирование приложения может быть осуществлено через Swagger доступный по адресу http://localhost/docs.
 
@@ -85,7 +85,7 @@ docker compose -f docker/docker-compose.yml down -v
 
 [⬆️Оглавление](#оглавление)
 </details>
- 
+
 <br>
 
 ## Удаление:
@@ -97,7 +97,7 @@ cd .. && rm -fr test-reactive-phone-FastAPI
 [⬆️Оглавление](#оглавление)
 
 <br>
-    
+
 ## Автор:
 [Aleksei Proskuriakov](https://github.com/alexpro2022)
 
