@@ -1,0 +1,4 @@
+DATABASE_URL=sqlite+aiosqlite:///./fastapi.db
+SECRET_KEY=MY_SECRET_KEY
+ADMIN_EMAIL=adm@adm.com
+ADMIN_PASSWORD=adm
