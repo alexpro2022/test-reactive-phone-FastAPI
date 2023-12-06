@@ -54,6 +54,7 @@ class BaseService:
     async def get_all(self, exception: bool = False) -> list[ModelType] | None:
         return await self.__get(exception=exception)
 
+# === Hooks ===
     async def set_cache_on_create(self, obj: ModelType) -> None:
         raise NotImplementedError(self.MSG_NOT_IMPLEMENTED)
 
@@ -64,22 +65,24 @@ class BaseService:
         raise NotImplementedError(self.MSG_NOT_IMPLEMENTED)
 
     async def create(self, payload: pydantic.BaseModel, **kwargs) -> ModelType:
-        """Base class provides database create method and put a setting
-        cache task to background."""
+        """Base class provides database `create` method and
+           not implemented `set_cache_on_create` template-method in FastAPI BackgroundTasks or directly."""
         obj = await self.db.create(payload, **kwargs)
         if self.redis is not None:
             await self._add_bg_task_or_execute(self.set_cache_on_create, obj)
         return obj
 
     async def update(self, pk: int, payload: pydantic.BaseModel, user: Any | None = None, **kwargs) -> ModelType:
-        """Base class provides database update method."""
+        """Base class provides database `update` method and
+           not implemented `set_cache_on_update` template-method in FastAPI BackgroundTasks or directly."""
         obj = await self.db.update(pk, payload, user, **kwargs)
         if self.redis is not None:
             await self._add_bg_task_or_execute(self.set_cache_on_update, obj)
         return obj
 
     async def delete(self, pk: int, user: Any | None = None) -> ModelType:
-        """Base class provides database delete method."""
+        """Base class provides database `delete` method and
+           not implemented `set_cache_on_delete` template-method in FastAPI BackgroundTasks or directly."""
         obj = await self.db.delete(pk, user)
         if self.redis is not None:
             await self._add_bg_task_or_execute(self.set_cache_on_delete, obj)

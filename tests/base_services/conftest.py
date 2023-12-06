@@ -5,7 +5,9 @@ import pytest_asyncio
 from fakeredis.aioredis import FakeRedis
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from tests.base_services.data import Base, TestData
+from app.repositories import CRUDBaseRepository
+from app.services import BaseService
+from tests.base_services.data import Base, Data
 from tests.conftest import pytest_mark_anyio as pm_anyio
 
 pytest_mark_anyio = pm_anyio
@@ -41,8 +43,8 @@ async def get_test_redis() -> AsyncGenerator[FakeRedis, Any]:
 
 
 @ pytest.fixture
-def get_test_obj() -> TestData.model:
+def get_test_obj() -> Data.model:
     data = {}
     data['id'] = 1
-    data.update(TestData.post_payload)
-    return TestData.model(**data)
+    data.update(Data.post_payload)
+    return Data.model(**data)

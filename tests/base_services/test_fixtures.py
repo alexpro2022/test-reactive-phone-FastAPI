@@ -2,7 +2,7 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.base_services.conftest import (Base, FakeRedis, TestData,
+from tests.base_services.conftest import (Base, Data, FakeRedis,
                                           pytest_mark_anyio)
 
 
@@ -25,8 +25,8 @@ async def test_get_test_redis(get_test_redis: FakeRedis) -> None:
     assert await get_test_redis.get('key') is None
 
 
-def test_get_test_obj(get_test_obj: TestData.model) -> None:
-    assert isinstance(get_test_obj, TestData.model)
+def test_get_test_obj(get_test_obj: Data.model) -> None:
+    assert isinstance(get_test_obj, Data.model)
     assert get_test_obj.id == 1
-    assert get_test_obj.title == TestData.post_payload['title']
-    assert get_test_obj.description == TestData.post_payload['description']
+    assert get_test_obj.title == Data.post_payload['title']
+    assert get_test_obj.description == Data.post_payload['description']

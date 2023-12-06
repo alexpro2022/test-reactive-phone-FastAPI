@@ -78,26 +78,30 @@ def get_method(instance: typing.Any, method_name: str):
     return method
 
 
+def info(*args, stop: bool = True):
+    for arg in args:
+        print('=================')
+        print(arg)
+    if stop:
+        assert 0
+
+
 def compare(left, right) -> None:
-    for item in (left, right):
-        item.__dict__.pop('_sa_instance_state')
-    assert left.__dict__ == right.__dict__
-    '''
-    def _get_attrs(item) -> tuple[str]:
-        assert item
-        item_attrs = vars(item)  # .__dict__
+    def clean(item) -> dict:
+        d = vars(item).copy()
         try:
-            item_attrs.pop('_sa_instance_state')
+            d.pop('_sa_instance_state')
         except KeyError:
             pass
-        return item_attrs
-    diff = DeepDiff(_get_attrs(left), _get_attrs(right), ignore_order=True)
-    assert not diff, diff
-    '''
+        return d
+    assert clean(left) == clean(right)
+    # diff = DeepDiff(clean(left), clean(right), ignore_order=True)
+    # assert not diff, diff
 
 
 def compare_lists(left: list, right: list) -> None:
-    assert left and right
+    assert left and isinstance(left, list)
+    assert right and isinstance(right, list)
     assert len(left) == len(right)
     for l, r in zip(left, right):
         compare(l, r)

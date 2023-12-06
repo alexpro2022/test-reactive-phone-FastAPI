@@ -6,12 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories import CRUDBaseRepository
 from tests.base_services.conftest import pytest_mark_anyio
-from tests.base_services.data import CRUD, TestData, TestModel
+from tests.base_services.data import CRUD, Data, Model
 from tests.utils import (check_exception_info, check_exception_info_not_found,
                          get_method)
 
 
-class TestCRUDBaseRepository(TestData):
+class TestCRUDBaseRepository(Data):
     """Тестовый класс для тестирования базового CRUD класса."""
     msg_already_exists = 'Object with such a unique values already exists.'
     msg_not_found = 'Object(s) not found.'
@@ -33,17 +33,17 @@ class TestCRUDBaseRepository(TestData):
     async def _db_empty(self):
         return await self.crud_base_not_implemented.get_all() is None
 
-    async def _create_object(self) -> TestModel:
+    async def _create_object(self) -> Model:
         return await self.crud_base_not_implemented._save(self.model(**self.post_payload))
 
-    def _check_obj(self, obj: TestModel, after_create: bool = True) -> None:
+    def _check_obj(self, obj: Model, after_create: bool = True) -> None:
         assert isinstance(obj, self.model)
         for field_name in self.field_names:
             assert getattr(obj, field_name)
         payload = self.post_payload if after_create else self.update_payload
         self._compare_values(obj, payload)
 
-    def _compare_values(self, obj: TestModel, payload: dict[str, str]) -> None:
+    def _compare_values(self, obj: Model, payload: dict[str, str]) -> None:
         assert obj.title == payload['title'], (obj.title, payload['title'])
         assert obj.description == payload['description'], (obj.description, payload['description'])
 
@@ -73,7 +73,7 @@ class TestCRUDBaseRepository(TestData):
         self._check_obj(obj)
 
     @pytest_mark_anyio
-    async def test_get(self) -> None:
+    async def test_get_method(self) -> None:
         """`get` should return None or object."""
         assert await self.crud_base_not_implemented.get(1) is None
         await self._create_object()
@@ -81,7 +81,7 @@ class TestCRUDBaseRepository(TestData):
         self._check_obj(obj)
 
     @pytest_mark_anyio
-    async def test_get_or_404(self) -> None:
+    async def test_get_or_404_method(self) -> None:
         """`get_or_404` should raise `HTTP_404_NOT_FOUND` or return object."""
         with pytest.raises(HTTPException) as exc_info:
             await self.crud_base_not_implemented.get_or_404(1)
@@ -91,7 +91,7 @@ class TestCRUDBaseRepository(TestData):
         self._check_obj(obj)
 
     @pytest_mark_anyio
-    async def test_get_all(self) -> None:
+    async def test_get_all_method(self) -> None:
         """`get_all` should raise `HTTP_404_NOT_FOUND` or return "None or object."""
         method = self.crud_base_not_implemented.get_all
         assert await method() is None
