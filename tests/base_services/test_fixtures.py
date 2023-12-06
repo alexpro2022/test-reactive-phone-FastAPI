@@ -2,8 +2,7 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.base_services.conftest import (Base, Data, FakeRedis,
-                                          pytest_mark_anyio)
+from tests.base_services.conftest import Data, FakeRedis, pytest_mark_anyio
 
 
 def test_event_loop_fixture(event_loop) -> None:

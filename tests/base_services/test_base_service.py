@@ -6,15 +6,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import RedisBaseRepository
 from app.services.services import BaseService
 from tests.base_services.conftest import FakeRedis, pytest_mark_anyio
-from tests.base_services.data import CRUD, Data
+from tests.base_services.data import CRUD, Data, Service
 from tests.utils import (check_exception_info, check_exception_info_not_found,
-                         compare, compare_lists, get_method, info)
+                         compare, compare_lists, get_method)
 
 
 class TestBaseService(Data):
     msg_not_found = 'Object(s) not found.'
     msg_not_implemented = "Method or function hasn't been implemented yet."
     base_service: BaseService
+    service: Service
 
     @pytest_asyncio.fixture(autouse=True)
     async def init(self, get_test_session: AsyncSession, get_test_redis: FakeRedis) -> None:
@@ -25,6 +26,16 @@ class TestBaseService(Data):
         assert isinstance(self.base_service, BaseService)
         assert isinstance(self.base_service.db, CRUD)
         assert isinstance(self.base_service.redis, RedisBaseRepository)
+
+    @pytest_asyncio.fixture()
+    async def get_service(self, get_test_session: AsyncSession, get_test_redis: FakeRedis) -> None:
+        self.service = Service(CRUD(self.model, get_test_session),
+                               RedisBaseRepository(get_test_redis))
+
+    def test_get_service_fixture(self, get_service) -> None:
+        assert isinstance(self.service, Service)
+        assert isinstance(self.service.db, CRUD)
+        assert isinstance(self.service.redis, RedisBaseRepository)
 
     @pytest_asyncio.fixture
     async def get_obj_in_db(self):
@@ -115,8 +126,48 @@ class TestBaseService(Data):
         compare(objs[0], obj)
 
     @pytest_mark_anyio
+    @pytest.mark.parametrize('background_tasks', (None, BackgroundTasks()))
+    async def test_create_method(self, get_service, background_tasks) -> None:
+        self.service.bg_tasks = background_tasks
+        assert await self._db_empty()
+        assert await self._cache_empty()
+        created = await self.service.create(self.create_schema(**self.post_payload))
+        assert not await self._db_empty()
+        obj = await self.service.db.get_or_404(created.id)
+        compare(obj, created)
+        if background_tasks is not None:
+            assert await self._cache_empty()
+        else:
+            await self._check_cache_equals_db()
+
+    @pytest_mark_anyio
+    @pytest.mark.parametrize('background_tasks', (None, BackgroundTasks()))
+    async def test_update_method(self, get_service, get_obj_in_db, background_tasks) -> None:
+        self.service.bg_tasks = background_tasks
+        created = get_obj_in_db
+        obj = await self.service.db.get_or_404(created.id)
+        compare(created, obj)
+        updated = await self.service.update(created.id, self.update_schema(**self.update_payload))
+        obj = await self.service.db.get_or_404(created.id)
+        compare(updated, obj)
+        if background_tasks is not None:
+            assert await self._cache_empty()
+        else:
+            await self._check_cache_equals_db()
+
+    @pytest_mark_anyio
+    async def test_delete_method(self, get_service) -> None:
+        created = await self.service.create(self.create_schema(**self.post_payload))
+        assert not await self._db_empty()
+        assert not await self._cache_empty()
+        await self.service.delete(created.id)
+        assert await self._db_empty()
+        assert await self._cache_empty()
+
+# === Exceptions ===
+    @pytest_mark_anyio
     @pytest.mark.parametrize('method_name', ('update', 'delete', 'get_or_404'))
-    async def test_methods_raises_exception_not_found(self, method_name) -> None:
+    async def test_method_raises_exception_not_found(self, method_name) -> None:
         pk = 1
         payload = self.update_schema(**self.update_payload)
         args = (pk, payload) if method_name == 'update' else (pk, )
@@ -128,7 +179,7 @@ class TestBaseService(Data):
     @pytest.mark.parametrize('method_name',
         ('set_cache_on_create', 'set_cache_on_update', 'set_cache_on_delete',
          'create', 'update', 'delete'))
-    async def test_methods_raises_exception_not_implemented(self, method_name, get_obj_in_db) -> None:
+    async def test_method_raises_exception_not_implemented(self, method_name, get_obj_in_db) -> None:
         pk = 1
         payload = self.update_schema(**self.update_payload)
         match method_name:
@@ -144,7 +195,7 @@ class TestBaseService(Data):
 
     @pytest_mark_anyio
     @pytest.mark.parametrize('method_name', ('create', 'update', 'delete'))
-    async def test_methods_not_raising_exception_not_implemented_from_bg_task(self, method_name, get_obj_in_db) -> None:
+    async def test_method_not_raising_exception_not_implemented_from_bg_task(self, method_name, get_obj_in_db) -> None:
         self.base_service.bg_tasks = BackgroundTasks()
         pk = 1
         payload = self.update_schema(**self.update_payload)

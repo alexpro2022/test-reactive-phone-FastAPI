@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -57,7 +55,7 @@ class TestCRUDBaseRepository(Data):
 
     @pytest_mark_anyio
     @pytest.mark.parametrize('method_name', ('_get_all_by_attrs', '_get_by_attrs'))
-    async def test_get_by_methods(self, method_name: str) -> None:
+    async def test_get_by_attrs_methods(self, method_name: str) -> None:
         title = self.post_payload['title']
         method = get_method(self.crud_base_not_implemented, method_name)
         # returns None if NOT_FOUND and exception=False by default
@@ -127,7 +125,7 @@ class TestCRUDBaseRepository(Data):
 
 # === Exceptions ===
     @pytest_mark_anyio
-    async def test_save_raise_exception_on_unique(self) -> None:
+    async def test_save_method_raises_exception_on_unique(self) -> None:
         await self._create_object()
         with pytest.raises(HTTPException) as exc_info:
             await self._create_object()
@@ -138,14 +136,14 @@ class TestCRUDBaseRepository(Data):
         ('is_update_allowed', (None, None), 'is_update_allowed() must be implemented.'),
         ('is_delete_allowed', (None,), 'is_delete_allowed() must be implemented.'),
     ))
-    def test_not_implemented_method_raise_exception(self, method_name: str, args: tuple[None, ...], expected_msg: str) -> None:
+    def test_not_implemented_method_raises_exception(self, method_name: str, args: tuple[None, ...], expected_msg: str) -> None:
         with pytest.raises(NotImplementedError) as exc_info:
             get_method(self.crud_base_not_implemented, method_name)(*args)
         check_exception_info(exc_info, expected_msg)
 
     @pytest_mark_anyio
     @pytest.mark.parametrize('method_name', ('update', 'delete'))
-    async def test_update_delete_raise_not_found_exceptions(self, method_name: str) -> None:
+    async def test_update_delete_methods_raise_not_found_exceptions(self, method_name: str) -> None:
         expected_msg=self.msg_not_found
         await self._update_delete_raise_exceptions(method_name, HTTPException, expected_msg, not_found=True)
 
@@ -154,15 +152,16 @@ class TestCRUDBaseRepository(Data):
         ('update', 'is_update_allowed() must be implemented.'),
         ('delete', 'is_delete_allowed() must be implemented.'),
     ))
-    async def test_update_delete_raise_is_allowed_exceptions(self, method_name: str, expected_msg: str) -> None:
+    async def test_update_delete_methods_raise_is_allowed_exceptions(self, method_name: str, expected_msg: str) -> None:
         await self._update_delete_raise_exceptions(method_name, NotImplementedError, expected_msg, self._create_object)
 
     @pytest_mark_anyio
     @pytest.mark.parametrize('method_name', ('update', 'delete'))
-    async def test_update_delete_raise_has_permission_exceptions(self, method_name: str) -> None:
+    async def test_update_delete_methods_raise_has_permission_exception(self, method_name: str) -> None:
         expected_msg = 'has_permission() must be implemented.'
         await self._update_delete_raise_exceptions(method_name, NotImplementedError, expected_msg, self._create_object, user=1)
 
+# === Utils ===
     async def _update_delete_raise_exceptions(self, method_name, exc_type, expected_msg, func=None, user=None, not_found=False):
         method = get_method(self.crud_base_not_implemented, method_name)
         args = (1,) if method_name == 'delete' else (1, self.update_schema(**self.update_payload))
