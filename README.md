@@ -46,6 +46,21 @@
 
 <br>
 
+## Запуск тестов:
+
+Из корневой директории проекта выполните команду:
+```bash
+docker build -f ./docker/test.Dockerfile -t social_network_tests .
+docker run --name tests social_network_tests
+docker container rm tests
+docker rmi social_network_tests
+```
+
+[⬆️Оглавление](#оглавление)
+
+<br>
+
+
 ## Описание работы
 
 Swagger позволяет осуществлять http-запросы к работающему сервису, тем самым можно управлять постами в рамках политики сервиса (указано в Swagger для каждого запроса).

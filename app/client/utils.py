@@ -12,8 +12,10 @@ logger = logging.getLogger(__name__)
 def log(func):
     async def wrapper(*args, **kwargs):
         logger.info('Loading...')
-        [logger.info(item) async for item in func(*args, **kwargs)]
+        data = [item async for item in func(*args, **kwargs)]
+        [logger.info(item) for item in data]
         logger.info('Successfully loaded')
+        return data
     return wrapper
 
 
