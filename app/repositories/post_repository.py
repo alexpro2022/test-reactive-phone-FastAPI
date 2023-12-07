@@ -8,7 +8,7 @@ from app.repositories.base_db_repository import CRUDBaseRepository
 class PostRepository(CRUDBaseRepository):
     OBJECT_ALREADY_EXISTS = 'Пост с таким заголовком уже существует.'
     NOT_FOUND = 'Пост(ы) не найден(ы).'
-    PERMISSION_DENIED = 'У вас нет права доступа к данному посту.'
+    PERMISSION_DENIED = 'У вас нет прав доступа к данному посту.'
     SELF_LIKE_DISLIKE_DENIED = 'Запрещено ставить LIKE/DISLIKE собственным постам.'
 
     def __init__(self, session: AsyncSession):

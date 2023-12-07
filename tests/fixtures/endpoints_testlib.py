@@ -1,7 +1,7 @@
 """
-Тесты для проверки ендпойнтов.
-Реализованы стандаптные проверки статус кодов, сообщений и ответных данных
-при валидных и не валидных значениях в именах ендпойнтов, параметров пути и
+Тесты для проверки эндпойнтов.
+Реализованы стандартные проверки статус кодов, сообщений и ответных данных
+при валидных и не валидных значениях в именах эндпойнтов, параметров пути и
 в ключах словарей параметров запроса, тела запроса и данных формы(data).
 Проверку валидных и не валидных значений этих словарей необходимо реализовывать отдельно.
 """
@@ -121,6 +121,10 @@ async def assert_response(
     return response
 
 
+def assert_status(response: Response, expected_status_code: int) -> None:
+    assert response.status_code == expected_status_code, f'\n   {response.status_code}\n   {response.json()}'
+
+
 async def standard_tests(
     client: AsyncClient,
     method: str,
@@ -197,3 +201,35 @@ async def not_allowed_methods_test(
 ) -> None:
     for method in not_allowed_methods:
         await assert_response(HTTPStatus.METHOD_NOT_ALLOWED, client, method, endpoint, path_param=path_param)
+
+
+# === ATHORIZATION ===
+def get_registered(user: dict) -> None:
+    response = client.post('/auth/register', json=user)
+    assert_status(response, HTTPStatus.CREATED)
+    auth_user = response.json()
+    assert isinstance(auth_user['id'], int)
+    assert auth_user['email'] == user['email']
+    assert auth_user['is_active'] == True
+    assert auth_user['is_superuser'] == False
+    assert auth_user['is_verified'] == False
+
+
+def get_auth_user_token(user: dict | None, registration: bool = True) -> str | None:
+    if user is None:
+        return None
+    if registration:
+        get_registered(user)
+    user = user.copy()
+    user['username'] = user['email']
+    response = client.post('/auth/jwt/login', data=user)
+    assert_status(response, HTTPStatus.OK)
+    token = response.json()['access_token']
+    assert isinstance(token, str)
+    return token
+
+
+def get_headers(token: str | None) -> dict[str:str] | None:
+    if token is None:
+        return None
+    return {'Authorization': f'Bearer {token}'}

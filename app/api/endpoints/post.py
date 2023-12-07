@@ -10,8 +10,7 @@ from app.services import post_service
 router = APIRouter(prefix='/post', tags=['Posts'])
 
 SUM_ALL_POSTS = 'Возвращает список всех постов.'
-SUM_ALL_USER_POSTS = ('Возвращает список всех постов '
-                      'выполняющего запрос пользователя.')
+SUM_ALL_USER_POSTS = 'Возвращает список всех постов выполняющего запрос пользователя.'
 SUM_POST = 'Возвращает пост по ID.'
 SUM_CREATE_POST = 'Создание нового поста.'
 SUM_UPDATE_POST = 'Редактирование поста.'

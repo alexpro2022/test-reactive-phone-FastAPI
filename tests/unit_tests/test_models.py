@@ -1,27 +1,17 @@
 import pytest
 
-from tests.conftest import Base, Dish, Menu, Submenu
-from tests.fixtures import data as d
+from tests.conftest import Post
 
-COMMON_FIELDS = ('id', 'title', 'description')
-
-
-@pytest.mark.parametrize('model, attrs', (
-    (Dish, (*COMMON_FIELDS, 'price', 'submenu_id', 'submenu')),
-    (Submenu, (*COMMON_FIELDS, 'dishes', 'menu_id', 'menu')),
-    (Menu, (*COMMON_FIELDS, 'submenus')),
-))
-def test_model_attr(model: Base, attrs: str) -> None:
-    for attr_name in attrs:
-        assert hasattr(model, attr_name)
+POST_MODEL_FIELDS = ('id', 'title', 'content', 'created', 'updated', 'likes', 'dislikes', 'author_id', 'author')
+POST_SAVE_DATA = {'title': 'Another New post title.', 'content': 'POST New post content.', 'author_id': 1}
 
 
-@pytest.mark.parametrize('model, data, attrs', (
-    (Dish, d.DISH_POST_PAYLOAD, (*COMMON_FIELDS, 'price')),
-    (Menu, d.MENU_POST_PAYLOAD, (*COMMON_FIELDS, 'submenus_count', 'dishes_count')),
-    (Submenu, d.SUBMENU_POST_PAYLOAD, (*COMMON_FIELDS, 'dishes_count')),
-))
-def test_model_repr(model: Base, data: dict[str, str], attrs: str) -> None:
-    representation = str(model(**data))
-    for attr_name in attrs:
+def test_model_fields() -> None:
+    for field in POST_MODEL_FIELDS:
+        assert hasattr(Post, field)
+
+
+def test_model_repr() -> None:
+    representation = str(Post(**POST_SAVE_DATA))
+    for attr_name in POST_MODEL_FIELDS[1:-1]:
         assert representation.find(attr_name) != -1

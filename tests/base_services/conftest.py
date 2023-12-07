@@ -29,6 +29,7 @@ async def init_db() -> AsyncGenerator[None, Any]:
         await conn.run_sync(Base.metadata.drop_all)
 
 
+# --- Fixtures for repositories testing -----------------------------------------------
 @pytest_asyncio.fixture
 async def get_test_session() -> Generator[Any, Any, None]:
     async with TestingSessionLocal() as session:

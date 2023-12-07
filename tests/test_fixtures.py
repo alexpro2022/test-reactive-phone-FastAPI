@@ -1,14 +1,45 @@
 import asyncio
 
+from fastapi import Depends
+
+from app.core import current_user
 from tests import conftest as c
 
-'''
 
+def test_event_loop_fixture(event_loop) -> None:
+    event_loop.run_until_complete(asyncio.sleep(0))
+
+
+def test_get_test_session(get_test_session: c.AsyncSession) -> None:
+    assert isinstance(get_test_session, c.AsyncSession)
+
+
+@c.pytest_mark_anyio
+async def test_get_test_redis(get_test_redis: c.FakeRedis) -> None:
+    assert isinstance(get_test_redis, c.FakeRedis)
+    assert await get_test_redis.set('key', 'value')
+    assert await get_test_redis.get('key') == b'value'
+    assert await get_test_redis.set('key', 'value2')
+    assert await get_test_redis.get('key') == b'value2'
+    assert await get_test_redis.delete('key')
+    assert await get_test_redis.get('key') is None
 
 
 # --- Fixtures for endpoints testing -----------------------------------------------
 def test_async_client(async_client: c.AsyncClient) -> None:
     assert isinstance(async_client, c.AsyncClient)
+
+
+'''
+@c.pytest_mark_anyio
+async def test_superuser_client(superuser_client):
+    user = await current_user()
+    print(user)
+    assert user.id == 1
+    assert user.is_active == True
+    assert user.is_verified == True
+    assert user.is_superuser == True
+
 
 
 def test_menu(menu: c.Response) -> None:

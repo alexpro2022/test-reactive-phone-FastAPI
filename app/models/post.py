@@ -26,5 +26,5 @@ class Post(Base):
             f'\nupdated: {self.updated},'
             f'\nlikes: {self.likes},'
             f'\ndislikes: {self.dislikes},'
-            f'\nauthor: {self.author}.\n'
+            f'\nauthor_id: {self.author_id}.\n'
         )

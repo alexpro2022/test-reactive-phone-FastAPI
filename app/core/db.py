@@ -1,10 +1,9 @@
 from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
-# import aioredis
 from sqlalchemy import MetaData
-from sqlalchemy.ext.asyncio import AsyncSession  # AsyncEngine,
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 from sqlalchemy.orm import (DeclarativeBase, Mapped, declared_attr,
                             mapped_column)
 
