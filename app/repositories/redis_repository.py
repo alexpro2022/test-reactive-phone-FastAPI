@@ -1,7 +1,6 @@
 import pickle
 from typing import Any
 
-# from aioredis import Redis
 from redis import asyncio as aioredis
 
 from app.core import settings

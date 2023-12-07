@@ -1,6 +1,5 @@
 from typing import AsyncGenerator
 
-# from aioredis import Redis
 from redis import asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
 
