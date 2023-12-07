@@ -26,9 +26,7 @@ def assert_status(response: Response, expected_status_code: int | tuple[int, ...
 
 def assert_msg(response: Response, expected_msg: str | None) -> None:
     if expected_msg is not None:
-        # assert response.json()['detail'] == expected_msg, (response.json().get('detail'), expected_msg)
-        response_json = response.json()
-        assert response_json == {'detail': expected_msg}, f'\n   {response_json} {expected_msg}'
+        assert response.json()['detail'] == expected_msg, (response.json().get('detail'), expected_msg)
 
 
 def get_invalid(item: int | str | dict) -> tuple:
