@@ -3,7 +3,7 @@ from typing import Any, AsyncGenerator, Generator
 import pytest
 import pytest_asyncio
 from fakeredis.aioredis import FakeRedis
-from fastapi import Request, Response  # noqa
+# from fastapi import Request, Response  # noqa
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
@@ -45,12 +45,12 @@ async def init_db() -> AsyncGenerator[None, Any]:
         await conn.run_sync(Base.metadata.drop_all)
 
 
-async def override_get_async_session() -> Generator[Any, Any, None]:
+async def override_get_async_session() -> Generator[AsyncSession, Any, None]:
     async with TestingSessionLocal() as session:
         yield session
 
 
-async def override_get_aioredis() -> AsyncGenerator[FakeRedis, Any]:
+async def override_get_aioredis() -> Generator[FakeRedis, Any, None]:
     r = FakeRedis()
     yield r
     await r.flushall()
@@ -62,27 +62,26 @@ app.dependency_overrides[get_aioredis] = override_get_aioredis
 
 # --- Fixtures for repositories testing in unit_tests -----------
 @pytest_asyncio.fixture
-async def get_test_session() -> Generator[Any, Any, None]:
-    async with TestingSessionLocal() as session:
+async def get_test_session() -> Generator[AsyncSession, Any, None]:
+    async for session in override_get_async_session():
         yield session
 
 
 @pytest_asyncio.fixture
-async def get_test_redis() -> AsyncGenerator[FakeRedis, Any]:
-    r = FakeRedis()
-    yield r
-    await r.flushall()
+async def get_test_redis() -> Generator[FakeRedis, Any, None]:
+    async for aioredis in override_get_aioredis():
+        yield aioredis
 
 
 # --- Fixtures for endpoints testing --------------------------------
 @pytest_asyncio.fixture
-async def async_client() -> AsyncGenerator[AsyncClient, Any]:
+async def async_client() -> Generator[AsyncClient, Any, None]:
     async with AsyncClient(app=app, base_url='http://testserver') as ac:
         yield ac
 
 
 @pytest.fixture
-def admin_user():
+def admin_user() -> Generator[None, Any, None]:
     app.dependency_overrides[current_user] = lambda: User(
         id=1,
         is_active=True,
@@ -94,65 +93,5 @@ def admin_user():
 
 
 @pytest_asyncio.fixture
-async def new_post(async_client):
+async def new_post(async_client) -> dict[str, str]:
     return await create_post(async_client)
-
-
-'''
-@pytest_asyncio.fixture
-async def menu(async_client: AsyncClient) -> Response:
-    menu = await async_client.post(d.ENDPOINT_MENU, json=d.MENU_POST_PAYLOAD)
-    assert menu.status_code == 201, (menu.headers, menu.content)
-    yield menu
-
-
-@pytest_asyncio.fixture
-async def submenu(async_client: AsyncClient, menu: Response) -> Response:
-    assert menu.status_code == 201, (menu.headers, menu.content)
-    submenu = await async_client.post(d.ENDPOINT_SUBMENU, json=d.SUBMENU_POST_PAYLOAD)
-    assert submenu.status_code == 201, (submenu.headers, submenu.content)
-    yield submenu
-
-
-@pytest_asyncio.fixture
-async def dish(async_client: AsyncClient, submenu: Response) -> Response:
-    assert submenu.status_code == 201, (submenu.headers, submenu.content)
-    dish = await async_client.post(d.ENDPOINT_DISH, json=d.DISH_POST_PAYLOAD)
-    assert dish.status_code == 201, (dish.headers, dish.content)
-    yield dish
-'''
-
-
-'''
-@pytest_asyncio.fixture
-async def get_menu_repo(get_test_session: AsyncSession) -> Generator[MenuRepository, Any, None]:
-    yield MenuRepository(get_test_session)
-
-
-@pytest_asyncio.fixture
-async def get_submenu_repo(get_test_session: AsyncSession) -> Generator[SubmenuRepository, Any, None]:
-    yield SubmenuRepository(get_test_session)
-
-
-@pytest_asyncio.fixture
-async def get_dish_repo(get_test_session: AsyncSession) -> Generator[DishRepository, Any, None]:
-    yield DishRepository(get_test_session)
-
-
-
-
-
-@pytest_asyncio.fixture
-async def get_menu_service(get_test_session: AsyncSession, get_test_redis: FakeRedis) -> Generator[MenuService, Any, None]:
-    yield MenuService(get_test_session, get_test_redis, None)
-
-
-@pytest_asyncio.fixture
-async def get_submenu_service(get_test_session: AsyncSession, get_test_redis: FakeRedis) -> Generator[SubmenuService, Any, None]:
-    yield SubmenuService(get_test_session, get_test_redis, None)
-
-
-@pytest_asyncio.fixture
-async def get_dish_service(get_test_session: AsyncSession, get_test_redis: FakeRedis) -> Generator[DishService, Any, None]:
-    yield DishService(get_test_session, get_test_redis, None)
-'''

@@ -2,18 +2,15 @@ from typing import Annotated
 
 from fastapi import BackgroundTasks, Depends
 
-from app.core import async_redis, async_session
+from app.core import async_redis, async_session, settings
 from app.models import Post, User
 from app.repositories import PostRepository, RedisBaseRepository
 from app.services import BaseService
 
-# async_session = Annotated[AsyncSession, Depends(get_async_session)]
-# async_redis = Annotated[Redis, Depends(get_aioredis)]
-
 
 class PostService(BaseService):
     def __init__(self, session: async_session, redis: async_redis, bg_tasks: BackgroundTasks):
-        super().__init__(PostRepository(session), RedisBaseRepository(redis, 'post:'), bg_tasks)
+        super().__init__(PostRepository(session), RedisBaseRepository(redis, settings.redis_prefix), bg_tasks)
 
     async def set_cache_on_create(self, post: Post) -> None:
         await super().set_cache(post)

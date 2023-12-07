@@ -4,7 +4,6 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories import PostRepository
-from tests.utils import info
 
 
 class TestPostRepository:

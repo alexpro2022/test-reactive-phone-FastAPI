@@ -35,10 +35,8 @@ class Data:
     create_schema = SchemaCreate
     update_schema = SchemaUpdate
     field_names = ('id', 'title', 'description')
-    post_payload = {'title': 'My created object',
-                    'description': 'My created object description'}
-    update_payload = {'title': 'My updated object',
-                      'description': 'My updated object description'}
+    post_payload = {'title': 'My created object', 'description': 'My created object description'}
+    update_payload = {'title': 'My updated object', 'description': 'My updated object description'}
 
 
 class CRUD(CRUDBaseRepository):

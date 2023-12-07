@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     content_max_length: int = 5000
     # cache
     redis_url: str = 'redis://redis:6379'
+    redis_prefix: str = 'post:'
     redis_expire: int = 3600
     '''
     # background tasks

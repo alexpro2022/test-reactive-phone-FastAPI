@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any
 
 from deepdiff import DeepDiff
 from fastapi import status
@@ -46,7 +46,6 @@ def check_exception_info_not_found(exc_info, msg_not_found: str) -> None:
 
 def info(*args, stop: bool = True):
     for arg in args:
-        print('=================')
-        print(arg)
+        print(f'\n{arg}')
     if stop:
         assert 0
