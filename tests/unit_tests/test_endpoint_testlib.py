@@ -17,8 +17,7 @@ def test_get_invalid() -> None:
 
 
 @pytest.mark.parametrize('item, expected_result', (
-    ('', ''), ('/', ''), ('//',
-                          ''), (f'/{SLASHLESS}/', SLASHLESS), (f'///{SLASHLESS}///', SLASHLESS)
+    ('', ''), ('  ', ''), ('/', ''), ('///////////', ''), (f'/{SLASHLESS}/', SLASHLESS), (f'///{SLASHLESS}///', SLASHLESS),
 ))
 def test_strip_slashes(item: str, expected_result: str) -> None:
     assert lib.strip_slashes(item) == expected_result.lower()
@@ -31,5 +30,6 @@ def test_create_endpoint(endpoint: str, path_param: str) -> None:
     if len(path):
         assert path[0] == '/'
         assert path[-1] != '/'
+        assert path.find('none') == -1
     else:
         assert path == ''

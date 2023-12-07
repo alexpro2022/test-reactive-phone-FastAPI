@@ -14,6 +14,7 @@ from app.main import app
 from app.models import Post, User  # noqa
 from app.repositories.base_db_repository import CRUDBaseRepository  # noqa
 from app.schemas import *  # noqa
+from tests.integration_tests.utils import create_post
 
 from .fixtures import data as d
 
@@ -59,25 +60,6 @@ app.dependency_overrides[get_async_session] = override_get_async_session
 app.dependency_overrides[get_aioredis] = override_get_aioredis
 
 
-# --- Fixtures for endpoints testing --------------------------------
-@pytest_asyncio.fixture
-async def async_client() -> AsyncGenerator[AsyncClient, Any]:
-    async with AsyncClient(app=app, base_url='http://testserver') as ac:
-        yield ac
-
-
-@pytest.fixture
-def superuser_client():
-    app.dependency_overrides[current_user] = lambda: User(
-        id=1,
-        is_active=True,
-        is_verified=True,
-        is_superuser=True,
-    )
-    yield
-    app.dependency_overrides[current_user] = current_user
-
-
 # --- Fixtures for repositories testing in unit_tests -----------
 @pytest_asyncio.fixture
 async def get_test_session() -> Generator[Any, Any, None]:
@@ -90,6 +72,30 @@ async def get_test_redis() -> AsyncGenerator[FakeRedis, Any]:
     r = FakeRedis()
     yield r
     await r.flushall()
+
+
+# --- Fixtures for endpoints testing --------------------------------
+@pytest_asyncio.fixture
+async def async_client() -> AsyncGenerator[AsyncClient, Any]:
+    async with AsyncClient(app=app, base_url='http://testserver') as ac:
+        yield ac
+
+
+@pytest.fixture
+def admin_user():
+    app.dependency_overrides[current_user] = lambda: User(
+        id=1,
+        is_active=True,
+        is_verified=True,
+        is_superuser=True,
+    )
+    yield
+    app.dependency_overrides[current_user] = current_user
+
+
+@pytest_asyncio.fixture
+async def new_post(async_client):
+    return await create_post(async_client)
 
 
 '''

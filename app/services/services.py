@@ -30,7 +30,8 @@ class PostService(BaseService):
     async def like_dislike_post(self, post_id: int, user: User, like: bool = True) -> Post:
         post = await self.db.like_dislike_post(post_id, user, like)
         if self.redis is not None:
-            self._add_bg_task_or_execute(self.set_cache, post)
+            await self._add_bg_task_or_execute(self.set_cache, post)
+        return post
 
 
 post_service = Annotated[PostService, Depends()]

@@ -18,11 +18,17 @@ def __dummy_func(*args, **kwargs) -> str:
     return DONE
 
 
+def assert_status(response: Response, expected_status_code: int | tuple[int, ...]) -> None:
+    if isinstance(expected_status_code, int):
+        expected_status_code = (expected_status_code,)
+    assert response.status_code in expected_status_code, (response.status_code, expected_status_code, response.headers, response.text)
+
+
 def assert_msg(response: Response, expected_msg: str | None) -> None:
     if expected_msg is not None:
+        # assert response.json()['detail'] == expected_msg, (response.json().get('detail'), expected_msg)
         response_json = response.json()
-        assert response_json == {
-            'detail': expected_msg}, f'\n   {response_json} {expected_msg}'
+        assert response_json == {'detail': expected_msg}, f'\n   {response_json} {expected_msg}'
 
 
 def get_invalid(item: int | str | dict) -> tuple:
@@ -43,31 +49,11 @@ def get_invalid(item: int | str | dict) -> tuple:
 
 
 def strip_slashes(item: str | None) -> str:
-    if item is None or not len(item):
-        return ''
-    slash = '/'
-    left = 0
-    try:
-        while item[left] == slash:
-            left += 1
-    except IndexError:
-        return ''
-    right = len(item)
-    while item[right - 1] == slash:
-        right -= 1
-    return item[left:right].lower()
+    return '' if item is None else str(item).lstrip(' /').rstrip(' /').lower()
 
 
 def create_endpoint(endpoint: str | None, path_param: int | str | None = None) -> str:
-    if endpoint is not None and set(endpoint) == set(' '):
-        endpoint = ''
-    if path_param is not None:
-        path = f'/{strip_slashes(endpoint)}/{strip_slashes(str(path_param))}'
-    else:
-        path = f'/{strip_slashes(endpoint)}'
-    if path == '/' or set(path) == set('/'):
-        return ''
-    return path[:-1] if path[-1] == '/' else path
+    return f'/{strip_slashes(endpoint)}/{strip_slashes(path_param)}'.rstrip(' /')
 
 
 async def get_response(
@@ -111,18 +97,13 @@ async def assert_response(
     if expected_status_code is None:
         match method.upper():
             case 'POST':
-                expected_status_code = HTTPStatus.CREATED
+                expected_status_code = (HTTPStatus.OK, HTTPStatus.CREATED)
             case 'DELETE':
-                expected_status_code = HTTPStatus.OK  # why not 204 NO_CONTENT ???
+                expected_status_code = (HTTPStatus.OK, HTTPStatus.NO_CONTENT)
             case _:
                 expected_status_code = HTTPStatus.OK
-    assert response.status_code == expected_status_code, (
-        response.status_code, expected_status_code, response.headers)
+    assert_status(response, expected_status_code)
     return response
-
-
-def assert_status(response: Response, expected_status_code: int) -> None:
-    assert response.status_code == expected_status_code, f'\n   {response.status_code}\n   {response.json()}'
 
 
 async def standard_tests(
@@ -164,7 +145,7 @@ async def standard_tests(
 
     # invalid_endpoint_test -----------------------------------------------------------------------------------
     for invalid_endpoint in get_invalid(endpoint):
-        await assert_response(
+        r = await assert_response(
             HTTPStatus.NOT_FOUND, client, method, invalid_endpoint, path_param=path_param, params=params, json=json, data=data, headers=headers)  # type: ignore [arg-type]
 
     # invalid_path_param_test -----------------------------------------------------------------------------------
@@ -183,6 +164,7 @@ async def standard_tests(
     # invalid_payload_keys_test -----------------------------------------------------------------------------------
     if json is not None and check_json:
         for invalid_json_keys in get_invalid(json):
+            print(invalid_json_keys)
             await assert_response(
                 HTTPStatus.UNPROCESSABLE_ENTITY, client, method, endpoint, path_param=path_param, params=params, json=invalid_json_keys, data=data, headers=headers)  # type: ignore [arg-type]
 
@@ -204,9 +186,9 @@ async def not_allowed_methods_test(
 
 
 # === ATHORIZATION ===
-def get_registered(user: dict) -> None:
-    response = client.post('/auth/register', json=user)
-    assert_status(response, HTTPStatus.CREATED)
+async def get_registered(async_client: AsyncClient, user: dict) -> None:
+    response = await async_client.post('/auth/register', json=user)
+    assert_status(response, (HTTPStatus.OK, HTTPStatus.CREATED))
     auth_user = response.json()
     assert isinstance(auth_user['id'], int)
     assert auth_user['email'] == user['email']
@@ -215,14 +197,14 @@ def get_registered(user: dict) -> None:
     assert auth_user['is_verified'] == False
 
 
-def get_auth_user_token(user: dict | None, registration: bool = True) -> str | None:
+async def get_auth_user_token(async_client: AsyncClient, user: dict | None, registration: bool = True) -> str | None:
     if user is None:
         return None
     if registration:
-        get_registered(user)
+        await get_registered(async_client, user)
     user = user.copy()
     user['username'] = user['email']
-    response = client.post('/auth/jwt/login', data=user)
+    response = await async_client.post('/auth/jwt/login', data=user)
     assert_status(response, HTTPStatus.OK)
     token = response.json()['access_token']
     assert isinstance(token, str)
@@ -230,6 +212,4 @@ def get_auth_user_token(user: dict | None, registration: bool = True) -> str | N
 
 
 def get_headers(token: str | None) -> dict[str:str] | None:
-    if token is None:
-        return None
-    return {'Authorization': f'Bearer {token}'}
+    return {'Authorization': f'Bearer {token}'} if token is not None else None

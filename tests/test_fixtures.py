@@ -30,6 +30,10 @@ def test_async_client(async_client: c.AsyncClient) -> None:
     assert isinstance(async_client, c.AsyncClient)
 
 
+@c.pytest_mark_anyio
+async def test_new_post(new_post) -> None:
+    assert new_post
+
 '''
 @c.pytest_mark_anyio
 async def test_superuser_client(superuser_client):

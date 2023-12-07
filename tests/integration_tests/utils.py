@@ -1,9 +1,11 @@
 from http import HTTPStatus
 
+from httpx import AsyncClient
+
 from ..fixtures.data import (AUTHOR, ENDPOINT, INVALID_FIELD_MSG_1,
                              INVALID_FIELD_MSG_2, POST_PAYLOAD, PUT_PAYLOAD)
-from ..fixtures.endpoints_testlib import (assert_response, get_auth_user_token,
-                                          get_headers)
+from ..fixtures.endpoints_testlib import (assert_response, assert_status,
+                                          get_auth_user_token, get_headers)
 
 GET = 'GET'
 POST = 'POST'
@@ -12,19 +14,17 @@ PATCH = 'PATCH'
 DELETE = 'DELETE'
 DONE = 'DONE'
 
-def _info(obj):
-    assert obj == '', (f'\ntype = {type(obj)}\nvalue = {obj}')
-
 
 def empty_list(response_json: list) -> str:
     assert response_json == []
     return DONE
 
 
-def create_post(user: dict = AUTHOR, post_author_headers: dict[str:str] | None = None) -> dict[str:str]:
+async def create_post(async_client: AsyncClient, user: dict = AUTHOR, post_author_headers: dict[str:str] | None = None) -> dict[str:str]:
     if post_author_headers is None:
-        post_author_headers = get_headers(get_auth_user_token(user))
-    # client.post(ENDPOINT, headers=post_author_headers, json=POST_PAYLOAD)
+        post_author_headers = get_headers(await get_auth_user_token(async_client, user))
+    r = await async_client.post(ENDPOINT, headers=post_author_headers, json=POST_PAYLOAD)
+    assert_status(r, HTTPStatus.CREATED)
     return post_author_headers
 
 
@@ -50,6 +50,7 @@ def check_post(response_json: dict, payload: dict, user: dict = AUTHOR, updated:
 
 
 def check_posts(response_json: list) -> str:
+    assert len(response_json)
     return check_post(response_json[0], POST_PAYLOAD)
 
 
