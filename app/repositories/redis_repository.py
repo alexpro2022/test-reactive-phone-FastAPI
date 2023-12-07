@@ -1,7 +1,8 @@
 import pickle
 from typing import Any
 
-from aioredis import Redis
+# from aioredis import Redis
+from redis import asyncio as aioredis
 
 from app.core import settings
 
@@ -13,7 +14,7 @@ serializer = pickle
 class RedisBaseRepository:
 
     def __init__(self,
-                 redis: Redis,
+                 redis: aioredis.Redis,
                  redis_key_prefix_with_delimeter: str = ':',
                  redis_expire: int = settings.redis_expire) -> None:
         self.redis = redis
