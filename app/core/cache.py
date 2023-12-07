@@ -1,7 +1,8 @@
 from typing import Annotated
 
-import aioredis
 from fastapi import Depends
+# import aioredis
+from redis import asyncio as aioredis
 
 from app.core.config import settings
 
