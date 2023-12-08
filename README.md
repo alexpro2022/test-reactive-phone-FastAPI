@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/alexpro2022/test-reactive-phone-FastAPI/graph/badge.svg?token=jWXqnr3w5Q)](https://codecov.io/gh/alexpro2022/test-reactive-phone-FastAPI)
 
 
-[Тестовое задание](https://docs.google.com/document/d/1_ZMjuXB0DnioQW7w30mrsA2WYzcdbWII4omgPvdPGQo/edit)
+[Тестовое задание]([https://docs.google.com/document/d/1_ZMjuXB0DnioQW7w30mrsA2WYzcdbWII4omgPvdPGQo/edit](https://docs.google.com/document/d/1AcmooPkbqhpI6lHGiyLOqEyN-t1nnbR9BFO8M6EfRtE/edit))
 
 <br>
 
