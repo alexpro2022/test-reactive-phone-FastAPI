@@ -1,6 +1,6 @@
 import logging
-from contextlib import asynccontextmanager as acm
-from typing import Annotated
+from contextlib import asynccontextmanager
+from typing import Annotated, Generator
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin
@@ -52,29 +52,24 @@ current_superuser = fastapi_users.current_user(active=True, superuser=True)
 authorized = Annotated[User, Depends(current_user)]
 admin = Annotated[User, Depends(current_superuser)]
 
+
 # Create superuseruser programmatically
-get_async_session_context = acm(get_async_session)
-get_user_db_context = acm(get_user_db)
-get_user_manager_context = acm(get_user_manager)
-
-
-async def create_user(email: EmailStr, password: str, is_superuser: bool = False):
+async def create_user(async_generator: Generator, email: EmailStr, password: str, is_superuser: bool = False) -> User:
     try:
-        async with get_async_session_context() as session:
-            async with get_user_db_context(session) as user_db:
-                async with get_user_manager_context(user_db) as user_manager:
-                    user = await user_manager.create(UserCreate(
-                        email=email,
-                        password=password,
-                        is_superuser=is_superuser))
-                    logger.info('Админ создан')
-                    return user
+        async with (asynccontextmanager(async_generator)() as session,
+                    asynccontextmanager(get_user_db)(session) as user_db,
+                    asynccontextmanager(get_user_manager)(user_db) as user_manager):
+            user = await user_manager.create(UserCreate(email=email, password=password, is_superuser=is_superuser))
     except UserAlreadyExists:
         logger.info('Админ уже существует')
+    else:
+        logger.info('Админ создан')
+        return user
 
 
-async def create_admin():
+async def create_admin(async_generator: Generator = get_async_session) -> User:
     if all((settings.admin_email, settings.admin_password)):
-        await create_user(email=settings.admin_email,
-                          password=settings.admin_password,
-                          is_superuser=True)
+        return await create_user(async_generator,
+                                 email=settings.admin_email,
+                                 password=settings.admin_password,
+                                 is_superuser=True)

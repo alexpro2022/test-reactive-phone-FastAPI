@@ -8,8 +8,9 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
 
-from app.core import (Base, current_user, get_aioredis, get_async_session,
-                      settings)
+from app.core import settings  # noqa
+from app.core import Base, current_user, get_aioredis, get_async_session
+from app.core.user import create_admin, create_user  # noqa
 from app.main import app
 from app.models import Post, User  # noqa
 from app.repositories.base_db_repository import CRUDBaseRepository  # noqa
