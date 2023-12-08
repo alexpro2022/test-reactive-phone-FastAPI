@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
+    model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
     # constants
     URL_PREFIX: str = '/api/v1/'
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     app_title: str = DEFAULT_STR
     app_description: str = DEFAULT_STR
     secret_key: SecretStr = DEFAULT_STR
-    database_url: str = DEFAULT_STR
+    database_url: str = 'sqlite+aiosqlite:///./fastapi.db'  # for GitHub tests
 
     # authentication
     admin_email: EmailStr = 'adm@adm.com'
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     content_max_length: int = 5000
 
     # cache
-    redis_url: str = DEFAULT_STR
+    redis_url: str = 'redis://redis:6379'  # for GitHub tests
     redis_expire: int = 3600
     redis_prefix: str = 'post:'
 
