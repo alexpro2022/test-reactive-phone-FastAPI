@@ -3,8 +3,7 @@ from contextlib import asynccontextmanager as acm
 from typing import Annotated
 
 from fastapi import Depends, Request
-from fastapi_users import (BaseUserManager, FastAPIUsers, IntegerIDMixin,
-                           InvalidPasswordException)
+from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin
 from fastapi_users.authentication import (AuthenticationBackend,
                                           BearerTransport, JWTStrategy)
 from fastapi_users.exceptions import UserAlreadyExists
@@ -14,6 +13,8 @@ from pydantic import EmailStr
 from app.core import async_session, get_async_session, settings
 from app.models import User
 from app.schemas.user import UserCreate
+from app.validators import (password_content_validator,
+                            password_length_validator)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,13 +23,8 @@ logger = logging.getLogger(__name__)
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def validate_password(self, password: str, user: User | UserCreate) -> None:
-        if len(password) < settings.password_length:
-            raise InvalidPasswordException(
-                f'Пароль должен быть длиной не менее '
-                f'{settings.password_length} символов.')
-        if user.email in password:
-            raise InvalidPasswordException(
-                'В пароле не должно содержаться e-mail.')
+        password_length_validator(password)
+        password_content_validator(password, user.email)
 
     async def on_after_register(self, user: User, request: Request | None = None) -> None:
         print(f'Пользователь {user.email} зарегистрирован.')
@@ -67,11 +63,12 @@ async def create_user(email: EmailStr, password: str, is_superuser: bool = False
         async with get_async_session_context() as session:
             async with get_user_db_context(session) as user_db:
                 async with get_user_manager_context(user_db) as user_manager:
-                    await user_manager.create(UserCreate(
+                    user = await user_manager.create(UserCreate(
                         email=email,
                         password=password,
                         is_superuser=is_superuser))
                     logger.info('Админ создан')
+                    return user
     except UserAlreadyExists:
         logger.info('Админ уже существует')
 

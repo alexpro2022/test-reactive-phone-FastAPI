@@ -14,6 +14,7 @@ from app.main import app
 from app.models import Post, User  # noqa
 from app.repositories.base_db_repository import CRUDBaseRepository  # noqa
 from app.schemas import *  # noqa
+from app.validators import *  # noqa
 from tests.integration_tests.utils import create_post
 
 from .fixtures import data as d
