@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+
 import pytest
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,22 +30,22 @@ class TestCRUDBaseRepository(Data):
         assert not isinstance(self.crud_base_not_implemented, CRUD)
         assert isinstance(self.crud_base_implemented, CRUD)
 
-    async def _db_empty(self):
-        return await self.crud_base_not_implemented.get_all() is None
-
     async def _create_object(self) -> Model:
         return await self.crud_base_not_implemented._save(self.model(**self.post_payload))
 
     def _check_obj(self, obj: Model, after_create: bool = True) -> None:
         assert isinstance(obj, self.model)
         for field_name in self.field_names:
-            assert getattr(obj, field_name)
+            assert hasattr(obj, field_name)
         payload = self.post_payload if after_create else self.update_payload
         self._compare_values(obj, payload)
 
     def _compare_values(self, obj: Model, payload: dict[str, str]) -> None:
         assert obj.title == payload['title'], (obj.title, payload['title'])
         assert obj.description == payload['description'], (obj.description, payload['description'])
+
+    async def _db_empty(self):
+        return await self.crud_base_not_implemented.get_all() is None
 
     def test_set_order_by(self):
         assert self.crud_base_not_implemented.set_order_by('') is None
@@ -76,19 +78,21 @@ class TestCRUDBaseRepository(Data):
     @pytest_mark_anyio
     async def test_get_method(self) -> None:
         """`get` should return None or object."""
-        assert await self.crud_base_not_implemented.get(1) is None
+        method = self.crud_base_not_implemented.get
+        assert await method(1) is None
         await self._create_object()
-        obj = await self.crud_base_not_implemented.get(1)
+        obj = await method(1)
         self._check_obj(obj)
 
     @pytest_mark_anyio
     async def test_get_or_404_method(self) -> None:
         """`get_or_404` should raise `HTTP_404_NOT_FOUND` or return object."""
+        method = self.crud_base_not_implemented.get_or_404
         with pytest.raises(HTTPException) as exc_info:
-            await self.crud_base_not_implemented.get_or_404(1)
+            await method(1)
         check_exception_info_not_found(exc_info, self.msg_not_found)
         await self._create_object()
-        obj = await self.crud_base_not_implemented.get_or_404(1)
+        obj = await method(1)
         self._check_obj(obj)
 
     @pytest_mark_anyio
@@ -101,23 +105,30 @@ class TestCRUDBaseRepository(Data):
         check_exception_info_not_found(exc_info, self.msg_not_found)
         await self._create_object()
         objs = await method()
+        assert isinstance(objs, list)
         self._check_obj(objs[0])
 
     @pytest_mark_anyio
-    async def test_create_method(self) -> None:
+    @pytest.mark.parametrize('kwargs', ({}, {'optional_field': dt.now()}))
+    async def test_create_method(self, kwargs) -> None:
+        crud = self.crud_base_not_implemented
         assert await self._db_empty()
-        obj = await self.crud_base_not_implemented.create(self.create_schema(**self.post_payload))
+        obj = await crud.create(self.create_schema(**self.post_payload), **kwargs)
         assert not await self._db_empty()
-        created = await self.crud_base_not_implemented.get_or_404(obj.id)
+        created = await crud.get_or_404(obj.id)
         self._check_obj(created)
+        assert created.optional_field if kwargs else created.optional_field is None
 
     @pytest_mark_anyio
-    async def test_update_method(self) -> None:
+    @pytest.mark.parametrize('kwargs', ({}, {'optional_field': dt.now()}))
+    async def test_update_method(self, kwargs) -> None:
+        crud = self.crud_base_implemented
         obj = await self._create_object()
         self._check_obj(obj)
-        await self.crud_base_implemented.update(obj.id, self.update_schema(**self.update_payload))
-        updated = await self.crud_base_not_implemented.get_or_404(obj.id)
+        await crud.update(obj.id, self.update_schema(**self.update_payload), **kwargs)
+        updated = await crud.get_or_404(obj.id)
         self._check_obj(updated, after_create=False)
+        assert updated.optional_field if kwargs else updated.optional_field is None
 
     @pytest_mark_anyio
     async def test_delete_method(self) -> None:

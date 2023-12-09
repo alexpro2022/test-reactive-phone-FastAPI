@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -17,6 +19,8 @@ class Model(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(unique=True)
     description: Mapped[str]
+    optional_field: Mapped[dt | None]
+
 
 
 class SchemaCreate(BaseModel):
@@ -34,7 +38,7 @@ class Data:
     model = Model
     create_schema = SchemaCreate
     update_schema = SchemaUpdate
-    field_names = ('id', 'title', 'description')
+    field_names = ('id', 'title', 'description', 'optional_field')
     post_payload = {'title': 'My created object', 'description': 'My created object description'}
     update_payload = {'title': 'My updated object', 'description': 'My updated object description'}
 

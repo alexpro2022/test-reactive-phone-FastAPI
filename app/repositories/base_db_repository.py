@@ -85,12 +85,14 @@ class CRUDBaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
         return obj
 
     async def create(self, payload: CreateSchemaType, **kwargs) -> ModelType:
+        """Creates an object with payload data, kwargs for fields like `user_id` etc."""
         create_data = payload.model_dump()
         if kwargs:
             create_data.update(kwargs)
         return await self._save(self.model(**create_data))
 
     async def update(self, pk: int, payload: UpdateSchemaType, user: Any | None = None, **kwargs) -> ModelType:
+        """Creates an object with payload data, kwargs for optional fields like `updated_at` etc."""
         obj = await self.get_or_404(pk)
         if user is not None:
             self.has_permission(obj, user)
