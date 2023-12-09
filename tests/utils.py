@@ -17,7 +17,7 @@ def compare(left, right) -> None:
     def clean(item) -> dict:
         wanted = '_sa_instance_state'
         d = vars(item).copy()
-        if hasattr(d, wanted):
+        if wanted in d:
             d.pop(wanted)
         return d
 
