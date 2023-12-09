@@ -15,12 +15,12 @@ def get_method(instance: Any, method_name: str):
 
 def compare(left, right) -> None:
     def clean(item) -> dict:
+        wanted = '_sa_instance_state'
         d = vars(item).copy()
-        try:
-            d.pop('_sa_instance_state')
-        except KeyError:
-            pass
+        if hasattr(d, wanted):
+            d.pop(wanted)
         return d
+
     assert clean(left) == clean(right)
     # diff = DeepDiff(clean(left), clean(right), ignore_order=True)
     # assert not diff, diff
@@ -42,10 +42,3 @@ def check_exception_info(exc_info, expected_msg: str, expected_error_code: int |
 
 def check_exception_info_not_found(exc_info, msg_not_found: str) -> None:
     check_exception_info(exc_info, msg_not_found, status.HTTP_404_NOT_FOUND)
-
-
-def info(*args, stop: bool = True):
-    for arg in args:
-        print(f'\n{arg}')
-    if stop:
-        assert 0
