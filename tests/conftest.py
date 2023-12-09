@@ -3,7 +3,6 @@ from typing import Any, AsyncGenerator, Generator
 import pytest
 import pytest_asyncio
 from fakeredis.aioredis import FakeRedis
-# from fastapi import Request, Response  # noqa
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
@@ -18,13 +17,7 @@ from app.schemas import *  # noqa
 from app.validators import *  # noqa
 from tests.integration_tests.utils import create_post
 
-from .fixtures import data as d
-
-# from app.services import BaseService  # noqa
-# from app.celery_tasks.utils import FILE_PATH  # noqa
-
-
-# pytest_plugins = ("celery.contrib.pytest", )
+pytest_plugins = ('celery.contrib.pytest', )
 
 pytest_mark_anyio = pytest.mark.asyncio
 # pytest_mark_anyio = pytest.mark.anyio
