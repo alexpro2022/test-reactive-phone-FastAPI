@@ -7,7 +7,7 @@ async-timeout==4.0.3
 # asyncpg==0.29.0
 bcrypt==4.1.1
 billiard==4.2.0
-# celery==5.3.6
+celery==5.3.6
 certifi==2023.11.17
 cffi==1.16.0
 cfgv==3.4.0
