@@ -45,6 +45,9 @@ class TestCRUDBaseRepository(Data):
         assert obj.title == payload['title'], (obj.title, payload['title'])
         assert obj.description == payload['description'], (obj.description, payload['description'])
 
+    def test_set_order_by(self):
+        assert self.crud_base_not_implemented.set_order_by('') is None
+
 # === CRUD ===
     @pytest_mark_anyio
     async def test_save(self) -> None:
