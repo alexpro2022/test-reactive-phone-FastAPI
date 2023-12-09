@@ -9,10 +9,13 @@ from ..fixtures.endpoints_testlib import (assert_status, get_auth_user_token,
 DONE = 'DONE'
 
 
-async def create_post(async_client: AsyncClient, user: dict = AUTHOR, post_author_headers: dict[str:str] | None = None) -> dict[str:str]:
+async def create_post(async_client: AsyncClient,
+                      user: dict = AUTHOR,
+                      post_author_headers: dict[str:str] | None = None,
+                      payload: dict = POST_PAYLOAD) -> dict[str:str]:
     if post_author_headers is None:
         post_author_headers = get_headers(await get_auth_user_token(async_client, user))
-    r = await async_client.post(ENDPOINT, headers=post_author_headers, json=POST_PAYLOAD)
+    r = await async_client.post(ENDPOINT, headers=post_author_headers, json=payload)
     assert_status(r, HTTPStatus.CREATED)
     return post_author_headers
 
