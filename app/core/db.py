@@ -26,7 +26,7 @@ class Base(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     def __repr__(self) -> str:
-        return (f'\nid: {self.id}\n')
+        return f'\nid: {self.id}\n'
 
 
 engine = create_async_engine(settings.database_url)
