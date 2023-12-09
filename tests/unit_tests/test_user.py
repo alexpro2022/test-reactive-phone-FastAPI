@@ -4,6 +4,7 @@ from app.core.user import create_admin, create_user
 from app.main import lifespan
 from tests.conftest import User, override_get_async_session, settings
 
+USER_CREDS = (settings.admin_email, settings.admin_password)
 
 def check_user(user: User, is_superuser: bool = True) -> None:
     assert user.email == settings.admin_email
@@ -14,11 +15,14 @@ def check_user(user: User, is_superuser: bool = True) -> None:
 @pytest.mark.asyncio
 @pytest.mark.parametrize('is_superuser', (True, False))
 async def test_create_user(is_superuser) -> None:
-    user = await create_user(override_get_async_session,
-                                   settings.admin_email,
-                                   settings.admin_password,
-                                   is_superuser=is_superuser)
+    user = await create_user(override_get_async_session, *USER_CREDS, is_superuser)
     check_user(user, is_superuser)
+
+
+@pytest.mark.asyncio
+async def test_create_user_uniqueness() -> None:
+    assert await create_user(override_get_async_session, *USER_CREDS)
+    assert await create_user(override_get_async_session, *USER_CREDS) is None
 
 
 @pytest.mark.asyncio
