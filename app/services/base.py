@@ -32,17 +32,16 @@ class BaseService:
         if obj:
             await self.redis.set_all(obj) if isinstance(obj, list) else await self.redis.set_obj(obj)
 
-    async def __get(self, method_name: str | None = None, pk: int | None = None, exception: bool = False
-                    ) -> ModelType | None:
+    async def __get(
+        self, method_name: str | None = None, pk: int | None = None, exception: bool = False
+    ) -> ModelType | None:
+        obj = None
         if self.redis is not None:
             obj = await self.redis.get_all() if pk is None else await self.redis.get_obj(pk)
-        else:
-            obj = None
-        if obj:
-            return obj
-        obj = await self.db.get_all(exception) if pk is None else await self.db.__getattribute__(method_name)(pk)
-        if self.redis is not None:
-            await self._add_bg_task_or_execute(self.set_cache, obj)
+        if not obj:
+            obj = await self.db.get_all(exception) if pk is None else await self.db.__getattribute__(method_name)(pk)
+            if self.redis is not None:
+                await self._add_bg_task_or_execute(self.set_cache, obj)
         return obj
 
     async def get(self, pk: int) -> ModelType | None:
