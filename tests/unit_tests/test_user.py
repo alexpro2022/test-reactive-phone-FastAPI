@@ -6,6 +6,7 @@ from tests.conftest import User, override_get_async_session, settings
 
 USER_CREDS = (settings.admin_email, settings.admin_password)
 
+
 def check_user(user: User, is_superuser: bool = True) -> None:
     assert user.email == settings.admin_email
     assert user.hashed_password

@@ -6,6 +6,7 @@ BASE_FIELDS = ('id',)
 POST_MODEL_FIELDS = ('id', 'title', 'content', 'created', 'updated', 'likes', 'dislikes', 'author_id', 'author')
 POST_SAVE_DATA = {'title': 'Another New post title.', 'content': 'POST New post content.', 'author_id': 1}
 
+
 class BaseTest(Base):
     pass
 

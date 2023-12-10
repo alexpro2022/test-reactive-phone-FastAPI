@@ -21,7 +21,8 @@ def __dummy_func(*args, **kwargs) -> str:
 def assert_status(response: Response, expected_status_code: int | tuple[int, ...]) -> None:
     if isinstance(expected_status_code, int):
         expected_status_code = (expected_status_code,)
-    assert response.status_code in expected_status_code, (response.status_code, expected_status_code, response.headers, response.text)
+    assert response.status_code in expected_status_code, (response.status_code, expected_status_code,
+                                                          response.headers, response.text)
 
 
 def assert_msg(response: Response, expected_msg: str | None) -> None:

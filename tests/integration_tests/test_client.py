@@ -17,7 +17,7 @@ async def test_get_data_from_tickers(event_loop):
         assert name in CURRENCIES
         assert isinstance(price, float)
         assert isinstance(timestamp, int)
-        res = ((dt.now() - timedelta(seconds=seconds)).timestamp()
-               < timestamp <
+        res = ((dt.now() - timedelta(seconds=seconds)).timestamp() <
+               timestamp <
                (dt.now() + timedelta(seconds=seconds)).timestamp())
         assert res

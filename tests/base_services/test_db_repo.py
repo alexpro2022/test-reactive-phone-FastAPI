@@ -160,7 +160,7 @@ class TestCRUDBaseRepository(Data):
     @pytest_mark_anyio
     @pytest.mark.parametrize('method_name', ('update', 'delete'))
     async def test_update_delete_methods_raise_not_found_exceptions(self, method_name: str) -> None:
-        expected_msg=self.msg_not_found
+        expected_msg = self.msg_not_found
         await self._update_delete_raise_exceptions(method_name, HTTPException, expected_msg, not_found=True)
 
     @pytest_mark_anyio
@@ -185,4 +185,5 @@ class TestCRUDBaseRepository(Data):
             await func()
         with pytest.raises(exc_type) as exc_info:
             await method(*args, user=user)
-        check_exception_info_not_found(exc_info, self.msg_not_found) if not_found else check_exception_info(exc_info, expected_msg)
+        (check_exception_info_not_found(exc_info, self.msg_not_found) if not_found else
+         check_exception_info(exc_info, expected_msg))

@@ -22,7 +22,6 @@ class Model(Base):
     optional_field: Mapped[dt | None]
 
 
-
 class SchemaCreate(BaseModel):
     title: str = Field(max_length=MAX_LEN)
     description: str = Field(max_length=MAX_LEN)

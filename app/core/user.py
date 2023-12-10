@@ -54,9 +54,11 @@ admin = Annotated[User, Depends(current_superuser)]
 
 
 # Create superuseruser programmatically
-async def create_user(async_generator: Generator, email: EmailStr, password: str, is_superuser: bool = False) -> User:
+async def create_user(
+    async_session_generator: Generator, email: EmailStr, password: str, is_superuser: bool = False
+) -> User:
     try:
-        async with (asynccontextmanager(async_generator)() as session,
+        async with (asynccontextmanager(async_session_generator)() as session,
                     asynccontextmanager(get_user_db)(session) as user_db,
                     asynccontextmanager(get_user_manager)(user_db) as user_manager):
             user = await user_manager.create(UserCreate(email=email, password=password, is_superuser=is_superuser))

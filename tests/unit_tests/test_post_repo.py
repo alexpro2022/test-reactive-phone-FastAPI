@@ -50,9 +50,9 @@ class TestPostRepository:
     def test_messages(self) -> None:
         def get_class_vars_consts(class_):
             return [attr for attr in class_.__dict__ if (
-                getattr(class_, attr) is not None
-                and not isinstance(getattr(class_, attr), Callable)
-                and not attr.startswith('__')
+                getattr(class_, attr) is not None and
+                not isinstance(getattr(class_, attr), Callable) and
+                not attr.startswith('__')
             )]
         test_attrs = get_class_vars_consts(self.__class__)
         post_attrs = get_class_vars_consts(PostRepository)

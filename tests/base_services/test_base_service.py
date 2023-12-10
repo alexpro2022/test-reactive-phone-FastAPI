@@ -177,8 +177,9 @@ class TestBaseService(Data):
 
     @pytest_mark_anyio
     @pytest.mark.parametrize('method_name',
-        ('set_cache_on_create', 'set_cache_on_update', 'set_cache_on_delete',
-         'create', 'update', 'delete'))
+                             ('set_cache_on_create', 'set_cache_on_update',
+                              'set_cache_on_delete', 'create', 'update', 'delete')
+                             )
     async def test_method_raises_exception_not_implemented(self, method_name, get_obj_in_db) -> None:
         pk = 1
         payload = self.update_schema(**self.update_payload)

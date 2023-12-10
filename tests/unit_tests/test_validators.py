@@ -10,8 +10,8 @@ INVALID_CONTENT_ARGS = ('email-password', 'email')
 VALID_CONTENT_ARGS = ('password', 'email')
 
 INVALID_LENGTH_MSG = f'Пароль должен быть длиной не менее {settings.password_length} символов.'
-INVALID_LENGTH_ARGS = ('a'*(settings.password_length-1),)
-VALID_LENGTH_ARGS = ('a'*(settings.password_length),)
+INVALID_LENGTH_ARGS = ('a' * (settings.password_length - 1),)
+VALID_LENGTH_ARGS = ('a' * (settings.password_length),)
 
 
 @pytest.mark.parametrize('method, valid_args, invalid_args, error_msg', (

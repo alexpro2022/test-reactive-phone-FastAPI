@@ -22,7 +22,7 @@ pytest_mark_anyio = pytest.mark.asyncio
     ((DELETE, PATCH, POST, PUT), LIKE_ENDPOINT, ID),
     ((DELETE, PATCH, POST, PUT), DISLIKE_ENDPOINT, ID),
 ))
-async def test_not_allowed_methods(async_client, admin_user, not_allowed_methods, endpoint, post_id ):
+async def test_not_allowed_methods(async_client, admin_user, not_allowed_methods, endpoint, post_id):
     for method in not_allowed_methods:
         await assert_response(HTTPStatus.METHOD_NOT_ALLOWED, async_client, method, endpoint, path_param=post_id)
 
