@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, AsyncGenerator, Generator
 
 import pytest
@@ -7,6 +8,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     create_async_engine)
 
+from app.client.deribit import CURRENCIES, get_data_from_tickers  # noqa
 from app.core import settings  # noqa
 from app.core import Base, current_user, get_aioredis, get_async_session
 from app.core.user import create_admin, create_user  # noqa

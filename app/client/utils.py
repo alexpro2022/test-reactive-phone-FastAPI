@@ -15,7 +15,7 @@ def log(func):
         data = [item async for item in func(*args, **kwargs)]
         [logger.info(item) for item in data]
         logger.info('Successfully loaded')
-        return data
+        return data[0]
     return wrapper
 
 

@@ -4,6 +4,7 @@ from tests import conftest as c
 
 
 def test_event_loop_fixture(event_loop) -> None:
+    # assert event_loop is asyncio.get_running_loop()
     event_loop.run_until_complete(asyncio.sleep(0))
 
 

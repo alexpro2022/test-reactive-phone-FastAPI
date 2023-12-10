@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+from datetime import timedelta
 from typing import Any
 
 from deepdiff import DeepDiff
@@ -42,3 +44,14 @@ def check_exception_info(exc_info, expected_msg: str, expected_error_code: int |
 
 def check_exception_info_not_found(exc_info, msg_not_found: str) -> None:
     check_exception_info(exc_info, msg_not_found, status.HTTP_404_NOT_FOUND)
+
+
+def check_currency(name: str, price: float, timestamp: int, currencies: tuple):
+    seconds = 10
+    assert name in currencies
+    assert isinstance(price, float)
+    assert isinstance(timestamp, int)
+    res = ((dt.now() - timedelta(seconds=seconds)).timestamp() <
+           timestamp <
+           (dt.now() + timedelta(seconds=seconds)).timestamp())
+    assert res
